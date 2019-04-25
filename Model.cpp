@@ -239,11 +239,9 @@ void Model::poisson_update_v1(double alpha, vector <double> labels, int centerId
     delete[] neule;
 }
 
-
 void Model::poisson_update_v2(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
     double *neule;
-    double z, g, eta;
-
+    double eta, g, z;
     neule = new double[dim_size];
     for (int d = 0; d < dim_size; d++)
         neule[d] = 0.0;
@@ -253,7 +251,10 @@ void Model::poisson_update_v2(double alpha, vector <double> labels, int centerId
         for (int d = 0; d < dim_size; d++)
             eta += emb0[centerId][d] * emb1[contextIds[i]][d];
 
-        z = labels[i] / eta - 1.0;
+        if(labels[i] > 0.0)
+            z = -exp( eta );
+        else
+            z = - log(sigmoid( exp( eta ) ));
 
         g = alpha * z;
 
@@ -270,6 +271,41 @@ void Model::poisson_update_v2(double alpha, vector <double> labels, int centerId
 
     delete[] neule;
 }
+
+void Model::poisson_update_v3(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
+    // link function, log
+    double *neule;
+    double eta, g, z;
+    neule = new double[dim_size];
+    for (int d = 0; d < dim_size; d++)
+        neule[d] = 0.0;
+
+    for (int i = 0; i < contextIds.size(); i++) {
+        eta = 0.0;
+        for (int d = 0; d < dim_size; d++)
+            eta += emb0[centerId][d] * emb1[contextIds[i]][d];
+
+        if(labels[i] > 0.0)
+            z = -eta;
+        else
+            z = -log(sigmoid( eta ));
+
+        g = alpha * z;
+
+        for (int d = 0; d < dim_size; d++) {
+            neule[d] += g * emb1[contextIds[i]][d];
+        }
+
+        for (int d = 0; d < dim_size; d++)
+            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+    }
+    for (int d = 0; d < dim_size; d++)
+        emb0[centerId][d] += neule[d];
+
+
+    delete[] neule;
+}
+
 
 
 void Model::exponential_update_v1(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
@@ -303,7 +339,67 @@ void Model::exponential_update_v1(double alpha, vector <double> labels, int cent
     delete[] neule;
 }
 
+void Model::gaussian_known_var(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
+    double *neule;
+    double z, g, eta;
 
+    neule = new double[dim_size];
+    for (int d = 0; d < dim_size; d++)
+        neule[d] = 0.0;
+
+    for (int i = 0; i < contextIds.size(); i++) {
+        eta = 0.0;
+        for (int d = 0; d < dim_size; d++)
+            eta += emb0[centerId][d] * emb1[contextIds[i]][d];
+
+        z = labels[i] - eta;
+
+        g = alpha * z;
+
+        for (int d = 0; d < dim_size; d++) {
+            neule[d] += g * emb1[contextIds[i]][d];
+        }
+
+        for (int d = 0; d < dim_size; d++)
+            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+    }
+    for (int d = 0; d < dim_size; d++)
+        emb0[centerId][d] += neule[d];
+
+
+    delete[] neule;
+}
+
+void Model::gaussian_my_prior(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
+    double *neule;
+    double z, g, eta;
+
+    neule = new double[dim_size];
+    for (int d = 0; d < dim_size; d++)
+        neule[d] = 0.0;
+
+    for (int i = 0; i < contextIds.size(); i++) {
+        eta = 0.0;
+        for (int d = 0; d < dim_size; d++)
+            eta += emb0[centerId][d] * emb1[contextIds[i]][d];
+
+        z = labels[i] - 2.0*eta;
+
+        g = alpha * z;
+
+        for (int d = 0; d < dim_size; d++) {
+            neule[d] += g * emb1[contextIds[i]][d];
+        }
+
+        for (int d = 0; d < dim_size; d++)
+            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+    }
+    for (int d = 0; d < dim_size; d++)
+        emb0[centerId][d] += neule[d];
+
+
+    delete[] neule;
+}
 
 
 void Model::run() {
@@ -395,11 +491,20 @@ void Model::run() {
 
                             //////////////////////////
                             //x[0] = cooccurences[centerId][contextIds[0]] / vocab_items[centerId].count;
-                            poisson_update_v1(alpha, x, centerId, contextIds);
+                            //x[0] = 15.0*relative_freq[centerId][contextIds[0]];
+                            //poisson_update_v1(alpha, x, centerId, contextIds);
                             //bernoulli_update(alpha, x, centerId, contextIds);
                             //////////////////////////
-
-
+                            //gaussian_known_var(alpha, x, centerId, contextIds);
+                            //gaussian_my_prior(alpha, x, centerId, contextIds);
+                            //x[0] = 1.0*relative_freq[centerId][contextIds[0]];
+                            //gaussian_known_var(alpha, x, centerId, contextIds);
+                            /////////////////////////////
+                            //exponential_update_v1(alpha, x, centerId, contextIds);
+                            ////////////////////////////////////////
+                            //poisson_update_v2(alpha, x, centerId, contextIds);
+                            poisson_update_v3(alpha, x, centerId, contextIds);
+                            ///////////////////////////////////////////////
                         }
 
                     }

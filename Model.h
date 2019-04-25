@@ -49,6 +49,9 @@ public:
     void poisson_update_v1(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void poisson_update_v2(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void exponential_update_v1(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
+    void gaussian_known_var(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
+    void gaussian_my_prior(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
+    void poisson_update_v3(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void run();
     void save_embeddings(string file_path);
 

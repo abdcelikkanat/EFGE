@@ -16,7 +16,7 @@ int main() {
     string dataset = "citeseer_undirected";
 
     input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_node2vec_p=1_q=1.corpus"; //_p=1_q=1
-    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_test.embedding";
+    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_n2v_poisson_v3.embedding";
 
 
     int window_size = 10;
