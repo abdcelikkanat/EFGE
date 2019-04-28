@@ -653,11 +653,11 @@ void Model::run() {
                                 //cout << "method4" << endl;
 
                                 x[0] =  relative_freq[centerId][contextIds[0]]+ 0.0;
-                                x[1] = normal_distr(generator)-2.0;
-                                x[2] = normal_distr(generator)-2.0;
-                                x[3] = normal_distr(generator)-2.0;
-                                x[4] = normal_distr(generator)-2.0;
-                                x[5] = normal_distr(generator)-2.0;
+                                x[1] = normal_distr(generator)-5.0;
+                                x[2] = normal_distr(generator)-5.0;
+                                x[3] = normal_distr(generator)-5.0;
+                                x[4] = normal_distr(generator)-5.0;
+                                x[5] = normal_distr(generator)-5.0;
 
                                 gaussian_known_var(alpha, x, centerId, contextIds);
                             }else {
