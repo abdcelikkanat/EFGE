@@ -4,7 +4,9 @@
 
 #include "Model.h"
 
-Model::Model(string f_path, int w_size, int neg, double s_alpha, double d_rate, double m_alpha, int num_iters, int dim) {
+Model::Model(string f_path, int w_size, int neg, double s_alpha, double d_rate, double m_alpha, int num_iters, int dim, string m_name) {
+
+    method_name = m_name;
 
     file_path = f_path;
     window_size = w_size;
@@ -137,6 +139,37 @@ vector <unordered_map <int, double>> Model::getRelativeFreq(vector <unordered_ma
 
         for(auto it=cooccurences[i].begin(); it != cooccurences[i].end(); ++it)
             relative_freq[i][it->first] = (float) cooccurences[i][it->first] / row_sum;
+
+    }
+
+    return relative_freq;
+
+}
+
+
+vector <unordered_map <int, double>> Model::getNormalizedFreq(vector <unordered_map <int, int>> cooccurences) {
+
+    double row_sum, mean, bias_std_dev;
+    vector <unordered_map <int, double>> relative_freq;
+    relative_freq.resize(vocab_size);
+
+    for(int i=0; i<vocab_size; i++) {
+        row_sum = 0.0;
+        for(auto it=cooccurences[i].begin(); it != cooccurences[i].end(); ++it)
+            row_sum += (float) cooccurences[i][it->first];
+        mean = row_sum / cooccurences[i].size();
+
+        bias_std_dev = 0.0;
+        for(auto it=cooccurences[i].begin(); it != cooccurences[i].end(); ++it)
+            bias_std_dev += pow( (float) cooccurences[i][it->first] - mean, 2 );
+        bias_std_dev = sqrt( bias_std_dev / cooccurences[i].size() );
+
+        if(cooccurences[i].size() == 1)
+            bias_std_dev = 1.0;
+        //cout << cooccurences[i].size() << " " << bias_std_dev << endl;
+
+        for(auto it=cooccurences[i].begin(); it != cooccurences[i].end(); ++it)
+            relative_freq[i][it->first] = (float) (cooccurences[i][it->first] - mean) / bias_std_dev;
 
     }
 
@@ -307,6 +340,54 @@ void Model::poisson_update_v3(double alpha, vector <double> labels, int centerId
 }
 
 
+void Model::poisson_update_v4(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
+
+
+
+
+    // link function, log
+    double *neule;
+    double eta, g, z;
+    neule = new double[dim_size];
+    for (int d = 0; d < dim_size; d++)
+        neule[d] = 0.0;
+
+    for (int i = 0; i < contextIds.size(); i++) {
+        eta = 0.0;
+        for (int d = 0; d < dim_size; d++) {
+            eta += emb0[centerId][d] * emb1[contextIds[i]][d];
+        }
+
+        eta = exp(eta);
+        if(labels[i] > 0.0)
+            z = -(1.0 / (1.0 - exp(eta)) )*eta;
+            //z = exp(-eta) / (exp(-eta) - 1.0);
+        else
+            z = -eta;
+
+
+        g = alpha * z;
+
+        for (int d = 0; d < dim_size; d++) {
+            neule[d] += g * emb1[contextIds[i]][d];
+        }
+
+        for (int d = 0; d < dim_size; d++) {
+            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+            //emb1[contextIds[i]][d] = max(0.0, emb1[contextIds[i]][d]);
+        }
+    }
+    for (int d = 0; d < dim_size; d++) {
+        emb0[centerId][d] += neule[d];
+        //emb0[centerId][d] = max(0.0, emb0[centerId][d]);
+    }
+
+
+
+
+    delete[] neule;
+}
+
 
 void Model::exponential_update_v1(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
     double *neule;
@@ -404,6 +485,10 @@ void Model::gaussian_my_prior(double alpha, vector <double> labels, int centerId
 
 void Model::run() {
 
+    //default_random_engine generator;
+    normal_distribution<double> normal_distr(0.0, 1.0);
+
+    /* */
     // Initialize parameters
     uniform_real_distribution<double> real_distr(-0.5 /dim_size , 0.5/dim_size);
 
@@ -415,9 +500,25 @@ void Model::run() {
     }
 
 
+    /*
+    // Initialize parameters
+    uniform_real_distribution<double> pois_uni(-2000.0 , 2000.0);
+
+    for(int node=0; node<vocab_size; node++) {
+        for(int d=0; d<dim_size; d++) {
+            //emb0[node][d] = max(0.0, pois_uni(generator));
+            //emb1[node][d] =  max(0.0, pois_uni(generator));
+            emb0[node][d] = pois_uni(generator);
+            emb1[node][d] =  pois_uni(generator);
+        }
+    }
+    */
+
+
+
     vector <unordered_map <int, int>> cooccurences = getCoOccurenceCount();
     vector <unordered_map <int, double>> relative_freq = getRelativeFreq(cooccurences);
-
+    vector <unordered_map <int, double>> normalized_freq = getNormalizedFreq(cooccurences);
 
     fstream fs(file_path, fstream::in);
     if(fs.is_open()) {
@@ -492,19 +593,77 @@ void Model::run() {
                             //////////////////////////
                             //x[0] = cooccurences[centerId][contextIds[0]] / vocab_items[centerId].count;
                             //x[0] = 15.0*relative_freq[centerId][contextIds[0]];
-                            //poisson_update_v1(alpha, x, centerId, contextIds);
+
+                            /*
+                            x[0]= 0;
+                            for(int count_pos=context_start_pos; count_pos<=context_end_pos; count_pos++) {
+                                if(center_pos != count_pos && node2Id[context_node] == node2Id[nodesInLine[count_pos]]) {
+                                    x[0] += 1;
+                                }
+                            }
+                            //cout << x[0] << endl;
+                            poisson_update_v1(alpha, x, centerId, contextIds);
+                            */
+
                             //bernoulli_update(alpha, x, centerId, contextIds);
                             //////////////////////////
                             //gaussian_known_var(alpha, x, centerId, contextIds);
                             //gaussian_my_prior(alpha, x, centerId, contextIds);
-                            //x[0] = 1.0*relative_freq[centerId][contextIds[0]];
-                            //gaussian_known_var(alpha, x, centerId, contextIds);
+
+                            //x[0] = pow(1.0*relative_freq[centerId][contextIds[0]], 0.15);
+
+                            /*
+                            x[0] =  relative_freq[centerId][contextIds[0]]+ 0.0;
+                            x[1] = normal_distr(generator)-2.0; //-2 best
+                            x[2] = normal_distr(generator)-2.0;
+                            x[3] = normal_distr(generator)-2.0;
+                            x[4] = normal_distr(generator)-2.0;
+                            x[5] = normal_distr(generator)-2.0;
+
+                            gaussian_known_var(alpha, x, centerId, contextIds);
+                            */
+
+                            //x[0] = 2.0*cooccurences[centerId][contextIds[0]] / vocab_items[centerId].count;
+                            //x[1] = normal_distr(generator)-0.0;
+                            //x[2] = normal_distr(generator)-0.0;
+                            //x[3] = normal_distr(generator)-0.0;
+                            //x[4] = normal_distr(generator)-0.0;
+                            //x[5] = normal_distr(generator)-0.0;
+
+                            //poisson_update_v4(alpha, x, centerId, contextIds);
                             /////////////////////////////
                             //exponential_update_v1(alpha, x, centerId, contextIds);
                             ////////////////////////////////////////
                             //poisson_update_v2(alpha, x, centerId, contextIds);
-                            poisson_update_v3(alpha, x, centerId, contextIds);
+                            //poisson_update_v3(alpha, x, centerId, contextIds);
                             ///////////////////////////////////////////////
+
+                            if(method_name.compare("method1") == 0) {
+                                //cout << "method1" << endl;
+                                bernoulli_update(alpha, x, centerId, contextIds);
+
+                            } else if(method_name.compare("method2") == 0) {
+                                //cout << "method2" << endl;
+                                poisson_update_v1(alpha, x, centerId, contextIds);
+
+                            } else if(method_name.compare("method3") == 0) {
+                                //cout << "method3" << endl;
+
+                            } else if(method_name.compare("method4") == 0) {
+                                //cout << "method4" << endl;
+
+                                x[0] =  relative_freq[centerId][contextIds[0]]+ 0.0;
+                                x[1] = normal_distr(generator)-2.0;
+                                x[2] = normal_distr(generator)-2.0;
+                                x[3] = normal_distr(generator)-2.0;
+                                x[4] = normal_distr(generator)-2.0;
+                                x[5] = normal_distr(generator)-2.0;
+
+                                gaussian_known_var(alpha, x, centerId, contextIds);
+                            }else {
+                                cout << "Not a valid method name" << endl;
+                            }
+
                         }
 
                     }

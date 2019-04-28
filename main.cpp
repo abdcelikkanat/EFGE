@@ -10,14 +10,26 @@ using namespace std;
 
 
 
-int main() {
+int main(int argc, char** argv) {
 
-    stringstream input_path, embedding_file;
+    stringstream input_path, embedding_file, method_name;
     string dataset = "citeseer_undirected";
 
-    input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_node2vec_p=1_q=1.corpus"; //_p=1_q=1
-    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_n2v_poisson_v3.embedding";
+    //input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
+    //embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_n2v_gaussian_var_relfreqx10.embedding";
 
+    if(argc == 4) {
+        input_path << argv[1];
+        embedding_file << argv[2];
+        method_name << argv[3];
+    } else {
+        cout << "Format: ./run input.corpus output.embedding method_name" << endl;
+        return 0;
+    }
+
+    cout << input_path.str() << endl;
+    cout << embedding_file.str() << endl;
+    cout << method_name.str() << endl;
 
     int window_size = 10;
     int negative_sample_size = 5;
@@ -28,7 +40,7 @@ int main() {
     int num_iters = 1;
 
 
-    Model model(input_path.str(), window_size, negative_sample_size, starting_alpha, decay_rate, min_alpha, num_iters, dim);
+    Model model(input_path.str(), window_size, negative_sample_size, starting_alpha, decay_rate, min_alpha, num_iters, dim, method_name.str());
     model.run();
     model.save_embeddings(embedding_file.str());
     //model.getCoOccurenceCount();
