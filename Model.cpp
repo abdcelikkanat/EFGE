@@ -343,8 +343,6 @@ void Model::poisson_update_v3(double alpha, vector <double> labels, int centerId
 void Model::poisson_update_v4(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
 
 
-
-
     // link function, log
     double *neule;
     double eta, g, z;
@@ -358,12 +356,12 @@ void Model::poisson_update_v4(double alpha, vector <double> labels, int centerId
             eta += emb0[centerId][d] * emb1[contextIds[i]][d];
         }
 
-        eta = exp(eta);
+        //eta = exp(eta);
         if(labels[i] > 0.0)
-            z = -(1.0 / (1.0 - exp(eta)) )*eta;
+            z = -(1.0 / (1.0 - exp(eta)) ); //*eta;
             //z = exp(-eta) / (exp(-eta) - 1.0);
         else
-            z = -eta;
+            z = -1.0;
 
 
         g = alpha * z;
@@ -373,13 +371,13 @@ void Model::poisson_update_v4(double alpha, vector <double> labels, int centerId
         }
 
         for (int d = 0; d < dim_size; d++) {
-            emb1[contextIds[i]][d] += g * emb0[centerId][d];
-            //emb1[contextIds[i]][d] = max(0.0, emb1[contextIds[i]][d]);
+            //emb1[contextIds[i]][d] += g * emb0[centerId][d];
+            emb1[contextIds[i]][d] = max(0.0, emb1[contextIds[i]][d]);
         }
     }
     for (int d = 0; d < dim_size; d++) {
-        emb0[centerId][d] += neule[d];
-        //emb0[centerId][d] = max(0.0, emb0[centerId][d]);
+        //emb0[centerId][d] += neule[d];
+        emb0[centerId][d] = max(0.0, emb0[centerId][d]);
     }
 
 
@@ -451,6 +449,59 @@ void Model::gaussian_known_var(double alpha, vector <double> labels, int centerI
     delete[] neule;
 }
 
+void Model::gaussian_kernel_update(double alpha, vector <double> labels, int centerId, vector <int> contextIds, double var) {
+
+    double *neule;
+    double *z, *g, eta, *diff;
+
+    neule = new double[dim_size];
+    diff = new double[dim_size];
+    z = new double[dim_size];
+    g = new double[dim_size];
+
+    for (int d = 0; d < dim_size; d++) {
+        neule[d] = 0.0;
+        diff[d] = 0.0;
+    }
+
+
+    for(int i = 0; i < contextIds.size(); i++) {
+
+        for (int d = 0; d < dim_size; d++)
+            diff[d] = emb1[contextIds[i]][d] - emb0[centerId][d];
+
+        eta = 0.0;
+        for (int d = 0; d < dim_size; d++)
+            eta += pow(diff[d], 2.0);
+
+        if(labels[i] == 1) {
+            for (int d = 0; d < dim_size; d++)
+                z[d] = -diff[d] / var;
+        } else {
+           for (int d = 0; d < dim_size; d++)
+                z[d] = (diff[d] / var) * (1.0 / (exp(eta / (2.0 * var)) - 1.0));
+        }
+
+        for (int d = 0; d < dim_size; d++)
+            g[d] = alpha * z[d];
+
+        for (int d = 0; d < dim_size; d++) {
+            neule[d] += -g[d];// * emb1[contextIds[i]][d];
+        }
+
+        for (int d = 0; d < dim_size; d++)
+            emb1[contextIds[i]][d] += g[d];// * emb0[centerId][d];
+    }
+    for (int d = 0; d < dim_size; d++)
+        emb0[centerId][d] += neule[d];
+
+
+    delete[] neule;
+    delete [] diff;
+    delete [] z;
+    delete [] g;
+}
+
 void Model::gaussian_my_prior(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
     double *neule;
     double z, g, eta;
@@ -492,6 +543,7 @@ void Model::run() {
     // Initialize parameters
     uniform_real_distribution<double> real_distr(-0.5 /dim_size , 0.5/dim_size);
 
+
     for(int node=0; node<vocab_size; node++) {
         for(int d=0; d<dim_size; d++) {
             emb0[node][d] = real_distr(generator);
@@ -502,18 +554,18 @@ void Model::run() {
 
     /*
     // Initialize parameters
-    uniform_real_distribution<double> pois_uni(-2000.0 , 2000.0);
+    uniform_real_distribution<double> pois_uni(-0.1, 0.000001);
 
     for(int node=0; node<vocab_size; node++) {
         for(int d=0; d<dim_size; d++) {
-            //emb0[node][d] = max(0.0, pois_uni(generator));
-            //emb1[node][d] =  max(0.0, pois_uni(generator));
-            emb0[node][d] = pois_uni(generator);
-            emb1[node][d] =  pois_uni(generator);
+            emb0[node][d] = max(0.0, pois_uni(generator));
+            emb1[node][d] =  max(0.0, pois_uni(generator));
+            //emb0[node][d] = pois_uni(generator);
+            //emb1[node][d] =  pois_uni(generator);
         }
     }
-    */
 
+    */
 
 
     vector <unordered_map <int, int>> cooccurences = getCoOccurenceCount();
@@ -630,7 +682,7 @@ void Model::run() {
                             //x[4] = normal_distr(generator)-0.0;
                             //x[5] = normal_distr(generator)-0.0;
 
-                            //poisson_update_v4(alpha, x, centerId, contextIds);
+
                             /////////////////////////////
                             //exponential_update_v1(alpha, x, centerId, contextIds);
                             ////////////////////////////////////////
@@ -647,19 +699,22 @@ void Model::run() {
                                 poisson_update_v1(alpha, x, centerId, contextIds);
 
                             } else if(method_name.compare("method3") == 0) {
-                                //cout << "method3" << endl;
+                                poisson_update_v4(alpha, x, centerId, contextIds);
 
                             } else if(method_name.compare("method4") == 0) {
                                 //cout << "method4" << endl;
 
-                                x[0] =  relative_freq[centerId][contextIds[0]]+ 0.0;
-                                x[1] = normal_distr(generator)-2.0;
-                                x[2] = normal_distr(generator)-2.0;
-                                x[3] = normal_distr(generator)-2.0;
-                                x[4] = normal_distr(generator)-2.0;
-                                x[5] = normal_distr(generator)-2.0;
+                                x[0] = relative_freq[centerId][contextIds[0]] + 0.0;
+                                x[1] = normal_distr(generator) - 5.0;
+                                x[2] = normal_distr(generator) - 5.0;
+                                x[3] = normal_distr(generator) - 5.0;
+                                x[4] = normal_distr(generator) - 5.0;
+                                x[5] = normal_distr(generator) - 5.0;
 
                                 gaussian_known_var(alpha, x, centerId, contextIds);
+                            } else if(method_name.compare("gauss_kernel") == 0) {
+                                gaussian_kernel_update(alpha, x, centerId, contextIds, 16.0);
+
                             }else {
                                 cout << "Not a valid method name" << endl;
                             }

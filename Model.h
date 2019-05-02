@@ -56,6 +56,7 @@ public:
     void gaussian_my_prior(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void poisson_update_v3(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void poisson_update_v4(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
+    void gaussian_kernel_update(double alpha, vector <double> labels, int centerId, vector <int> contextIds, double std);
     void run();
     void save_embeddings(string file_path);
 
