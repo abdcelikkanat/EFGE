@@ -713,7 +713,7 @@ void Model::run() {
 
                                 gaussian_known_var(alpha, x, centerId, contextIds);
                             } else if(method_name.compare("gauss_kernel") == 0) {
-                                gaussian_kernel_update(alpha, x, centerId, contextIds, 16.0);
+                                gaussian_kernel_update(alpha, x, centerId, contextIds, 25.0);
 
                             }else {
                                 cout << "Not a valid method name" << endl;

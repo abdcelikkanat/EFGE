@@ -15,9 +15,9 @@ int main(int argc, char** argv) {
     stringstream input_path, embedding_file, method_name;
     string dataset = "cora_undirected";
 
-    input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
-    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_n2v_gaussian_var_relfreqx10.embedding";
-    method_name << "method3";
+    input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_deepwalk.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
+    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_kernel.embedding";
+    method_name << "gauss_kernel";
 
     /*
     if(argc == 4) {
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     double starting_alpha = 0.025;
     double decay_rate = 1.0;
     double min_alpha = 0.0001;
-    int num_iters = 1;
+    int num_iters = 3;
 
 
     Model model(input_path.str(), window_size, negative_sample_size, starting_alpha, decay_rate, min_alpha, num_iters, dim, method_name.str());
