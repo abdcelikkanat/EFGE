@@ -13,7 +13,7 @@ using namespace std;
 int main(int argc, char** argv) {
 
     stringstream input_path, embedding_file, method_name;
-    string dataset = "citeseer_undirected";
+    //string dataset = "citeseer_undirected";
 
     //input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
     //embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_n2v_gaussian_var_relfreqx10.embedding";
