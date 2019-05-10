@@ -13,11 +13,13 @@ using namespace std;
 int main(int argc, char** argv) {
 
     stringstream input_path, embedding_file, method_name;
-    string dataset = "citeseer_undirected";
+    string dataset = "cora_undirected";
 
-    //input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
-    //embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_n2v_gaussian_var_relfreqx10.embedding";
+    input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_node2vec_p=1_q=1.corpus"; //"_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
+    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_method2_dene.embedding";
+    method_name << "method2";
 
+    /*
     if(argc == 4) {
         input_path << argv[1];
         embedding_file << argv[2];
@@ -26,7 +28,7 @@ int main(int argc, char** argv) {
         cout << "Format: ./run input.corpus output.embedding method_name" << endl;
         return 0;
     }
-
+    */
     cout << input_path.str() << endl;
     cout << embedding_file.str() << endl;
     cout << method_name.str() << endl;
