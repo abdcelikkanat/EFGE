@@ -677,13 +677,16 @@ void Model::run() {
 
                             } else if(method_name.compare("method2") == 0) {
                                 //cout << "method2" << endl;
-                                /* */
+                                /* 
                                 x[0]= 0;
                                 for(int count_pos=context_start_pos; count_pos<=context_end_pos; count_pos++) {
                                     if(center_pos != count_pos && node2Id[context_node] == node2Id[nodesInLine[count_pos]]) {
-                                        x[0] += 1;
+                                        x[0] += 1.0;
                                     }
                                 }
+				x[0] = x[0] / 9.0;
+				*/
+				x[0] = 1.0;
 
                                 poisson_update_v1(alpha, x, centerId, contextIds);
 
