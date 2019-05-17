@@ -57,6 +57,8 @@ public:
     void poisson_update_v3(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void poisson_update_v4(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void pareto_update(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
+    void pareto_update_v2(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
+    void gaussian_known_var_exp(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void run();
     void save_embeddings(string file_path);
 

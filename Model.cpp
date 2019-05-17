@@ -435,6 +435,7 @@ void Model::gaussian_known_var(double alpha, vector <double> labels, int centerI
             eta += emb0[centerId][d] * emb1[contextIds[i]][d];
 
         z = labels[i]/std_dev - eta;
+        //z = ( labels[i] - pow(eta, 2.0) / 2.0 ) * eta;
 
         g = alpha * z;
 
@@ -452,6 +453,40 @@ void Model::gaussian_known_var(double alpha, vector <double> labels, int centerI
     delete[] neule;
 }
 
+void Model::gaussian_known_var_exp(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
+    double *neule;
+    double z, g, eta;
+    double std_dev = 1.0;
+
+    neule = new double[dim_size];
+    for (int d = 0; d < dim_size; d++)
+        neule[d] = 0.0;
+
+    for (int i = 0; i < contextIds.size(); i++) {
+        eta = 0.0;
+        for (int d = 0; d < dim_size; d++)
+            eta += emb0[centerId][d] * emb1[contextIds[i]][d];
+
+        z = -labels[i]*exp(-eta) + exp(-2.0*eta);
+        //z = ( labels[i] - pow(eta, 2.0) / 2.0 ) * eta;
+
+        g = alpha * z;
+
+        for (int d = 0; d < dim_size; d++) {
+            neule[d] += g * emb1[contextIds[i]][d];
+        }
+
+        for (int d = 0; d < dim_size; d++)
+            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+    }
+    for (int d = 0; d < dim_size; d++)
+        emb0[centerId][d] += neule[d];
+
+
+    delete[] neule;
+}
+
+
 void Model::pareto_update(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
     double *neule;
     double z, g, eta;
@@ -467,6 +502,38 @@ void Model::pareto_update(double alpha, vector <double> labels, int centerId, ve
             eta += emb0[centerId][d] * emb1[contextIds[i]][d];
 
         z = log(labels[i]) + 1.0 / (1.0 + eta) + log(x_min);
+
+        g = alpha * z;
+
+        for (int d = 0; d < dim_size; d++) {
+            neule[d] += g * emb1[contextIds[i]][d];
+        }
+
+        for (int d = 0; d < dim_size; d++)
+            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+    }
+    for (int d = 0; d < dim_size; d++)
+        emb0[centerId][d] += neule[d];
+
+
+    delete[] neule;
+}
+
+void Model::pareto_update_v2(double alpha, vector <double> labels, int centerId, vector <int> contextIds) {
+    double *neule;
+    double z, g, eta;
+    double x_min = 1;
+
+    neule = new double[dim_size];
+    for (int d = 0; d < dim_size; d++)
+        neule[d] = 0.0;
+
+    for (int i = 0; i < contextIds.size(); i++) {
+        eta = 0.0;
+        for (int d = 0; d < dim_size; d++)
+            eta += emb0[centerId][d] * emb1[contextIds[i]][d];
+
+        z = exp(eta)*log(labels[i]) + sigmoid(eta);
 
         g = alpha * z;
 
@@ -678,13 +745,7 @@ void Model::run() {
                             } else if(method_name.compare("method2") == 0) {
                                 //cout << "method2" << endl;
                                 /* */
-                                x[0]= 0;
-                                for(int count_pos=context_start_pos; count_pos<=context_end_pos; count_pos++) {
-                                    if(center_pos != count_pos && node2Id[context_node] == node2Id[nodesInLine[count_pos]]) {
-                                        x[0] += 1;
-                                    }
-                                }
-
+                                x[0] = 1;
                                 poisson_update_v1(alpha, x, centerId, contextIds);
 
                             } else if(method_name.compare("method3") == 0) {
@@ -703,10 +764,17 @@ void Model::run() {
                                 gaussian_known_var(alpha, x, centerId, contextIds);
 
                             } else if(method_name.compare("method4") == 0) {
-                                x[0] = 1;
+                                x[0] = 10.0;
                                 for(int n=1; n<=negative_sample_size; n++)
-                                    x[n] = 0;
+                                    x[n] = 5.0;
                                 gaussian_known_var(alpha, x, centerId, contextIds);
+
+                            } else if(method_name.compare("method4_exp") == 0) {
+                                x[0] = 1.0;
+                                for(int n=1; n<=negative_sample_size; n++)
+                                    x[n] = 0.0;
+                                gaussian_known_var_exp(alpha, x, centerId, contextIds);
+
 
                             } else if(method_name.compare("pareto") == 0) {
 
@@ -719,6 +787,17 @@ void Model::run() {
                                }
 
                                 pareto_update(alpha, x, centerId, contextIds);
+
+                            } else if(method_name.compare("pareto2") == 0) {
+
+
+                                for(int n=0; n < negative_sample_size + 1; n++) {
+                                    if(cooccurences[centerId][contextIds[0]] < 1)
+                                        x[n] = 1;
+                                    else
+                                        x[n] = cooccurences[centerId][contextIds[n]]; // / (double)vocab_items[centerId].count;
+                                }
+                                pareto_update_v2(alpha, x, centerId, contextIds);
 
                             }else {
                                 cout << "Not a valid method name" << endl;
