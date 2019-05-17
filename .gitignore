@@ -1,0 +1,5 @@
+*.o
+*.edgelist
+*.embedding
+*.corpus
+./walks/*

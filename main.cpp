@@ -15,11 +15,11 @@ int main(int argc, char** argv) {
     stringstream input_path, embedding_file, method_name;
     
     /*
-    string dataset = "citeseer_undirected";
+    string dataset = "Homo_sapiens_undirected"; //"citeseer_undirected";
 
-    input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_node2vec_p=1_q=1.corpus"; //"_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
-    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_method4_deneme.embedding";
-    method_name << "method4";
+    input_path << "/home/abdulkadir/Desktop/expon/link_prediction_walks/walks/" << dataset << "_node2vec_p=1_q=1.corpus"; //"_n=80_l=10_method=dw_sample=1.corpus"; //"_node2vec_p=1_q=1.corpus"; //"_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
+    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_method4_exp.embedding";
+    method_name << "method4_exp";
 
     */
     if(argc == 4) {
@@ -38,9 +38,15 @@ int main(int argc, char** argv) {
     int window_size = 10;
     int negative_sample_size = 5;
     int dim = 128;
+<<<<<<< HEAD
     double starting_alpha = 0.025*0.1;
     double decay_rate = 1.0;
     double min_alpha = 0.0001*0.1;
+=======
+    double starting_alpha = 0.025;
+    double decay_rate = 1;
+    double min_alpha = 0.0001;
+>>>>>>> 8e002907943e6d61a27682fa34987ece5ccfc46b
     int num_iters = 1;
 
 
