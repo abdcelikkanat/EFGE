@@ -467,7 +467,7 @@ void Model::gaussian_known_var_exp(double alpha, vector <double> labels, int cen
         for (int d = 0; d < dim_size; d++)
             eta += emb0[centerId][d] * emb1[contextIds[i]][d];
 
-        z = -labels[i]*exp(-eta) + exp(-2.0*eta);
+        z = -(labels[i]/std_dev)*exp(-eta) + exp(-2.0*eta);
         //z = ( labels[i] - pow(eta, 2.0) / 2.0 ) * eta;
 
         g = alpha * z;
