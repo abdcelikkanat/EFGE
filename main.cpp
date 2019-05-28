@@ -15,10 +15,9 @@ int main(int argc, char** argv) {
     stringstream input_path, embedding_file, method_name;
     
 
-    string dataset = "karate"; //"citeseer_undirected";
-
-    input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_node2vec_n=80_l=3.corpus";//"_n=10_l=80_p=1_q=1_method=n2v_sample=1.corpus";//"_node2vec_p=1_q=1_sample=1.corpus"; //"_n=80_l=10_method=dw_sample=1.corpus"; //"_node2vec_p=1_q=1.corpus"; //"_afaki.corpus"; //"_node2vec_p=1_q=1.corpus"; //_p=1_q=1
-    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_method1_dim=2.embedding";
+    string dataset = "citeseer_undirected";
+    input_path << "/home/abdulkadir/Desktop/expon/walks/" << dataset << "_node2vec_p=1_q=1_sample=1.corpus";
+    embedding_file << "/home/abdulkadir/Desktop/expon/embeddings/" << dataset << "_method1.embedding";
     method_name << "method1";
 
     /*
@@ -32,9 +31,9 @@ int main(int argc, char** argv) {
     }
     */
 
-    cout << input_path.str() << endl;
-    cout << embedding_file.str() << endl;
-    cout << method_name.str() << endl;
+    cout << "Input file: " << input_path.str() << endl;
+    cout << "Output file: " << embedding_file.str() << endl;
+    cout << "Method name: " << method_name.str() << endl;
 
     int window_size = 10;
     int negative_sample_size = 5;
