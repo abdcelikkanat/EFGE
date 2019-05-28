@@ -2,10 +2,10 @@
 CC=g++
 CFLAGS=-c -Wall -std=c++11
 
-all: run
+all: expfamemb
 
-run: main.o Graph.o Node.o Model.o Unigram.o Vocabulary.o
-	$(CC) main.o Graph.o Node.o Model.o Unigram.o Vocabulary.o -o run
+expfamemb: main.o Graph.o Node.o Model.o Unigram.o Vocabulary.o
+	$(CC) main.o Graph.o Node.o Model.o Unigram.o Vocabulary.o -o expfamemb
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) main.cpp
@@ -27,5 +27,5 @@ Vocabulary.o: Vocabulary.cpp
 
 
 clean:
-	rm *.o run
+	rm *.o expfamemb
 

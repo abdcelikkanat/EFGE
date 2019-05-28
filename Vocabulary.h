@@ -1,5 +1,5 @@
 //
-// Created by abdulkadir on 23/04/19.
+//
 //
 
 #ifndef FAST_BERN_VOCABULARY_H

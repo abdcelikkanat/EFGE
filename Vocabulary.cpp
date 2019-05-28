@@ -1,5 +1,5 @@
 //
-// Created by abdulkadir on 23/04/19.
+//
 //
 
 #include "Vocabulary.h"

@@ -1,5 +1,5 @@
 //
-// Created by abdulkadir on 23/04/19.
+//
 //
 
 #ifndef FAST_BERN_MODEL_H
@@ -41,23 +41,12 @@ private:
 
 public:
 
-    Model(string f_path, int w_size, int neg, double s_alpha, double d_rate, double m_alpha, int num_iters, int dim, string method_name);
+    Model(string f_path, string method_name, double s_alpha, double m_alpha, double d_rate, int dim, int neg, int w_size, int num_iters);
     ~Model();
-    vector <unordered_map <int, int>> getCoOccurenceCount();
-    vector <unordered_map <int, double>> getRelativeFreq(vector <unordered_map <int, int>> cooccurences);
-    vector <unordered_map <int, double>> getNormalizedFreq(vector <unordered_map <int, int>> cooccurences);
     double sigmoid(double z);
     void bernoulli_update(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void bernoulli_update_v2(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void poisson_update_v1(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void poisson_update_v2(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void exponential_update_v1(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void gaussian_known_var(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void gaussian_my_prior(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void poisson_update_v3(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void poisson_update_v4(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void pareto_update(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
-    void pareto_update_v2(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void gaussian_known_var_exp(double alpha, vector <double> labels, int centerId, vector <int> contextIds);
     void run();
     void save_embeddings(string file_path);
