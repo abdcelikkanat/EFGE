@@ -1,31 +1,40 @@
+src=./src
+build=./build
+
+
 # compiler
 CC=g++
-CFLAGS=-c -Wall -std=c++11
+CFLAGS=-c -Wall -std=c++11 -Ilib
 
-all: expfamemb
+.PHONY: all
+all: efge
 
-expfamemb: main.o Graph.o Node.o Model.o Unigram.o Vocabulary.o
-	$(CC) main.o Graph.o Node.o Model.o Unigram.o Vocabulary.o -o expfamemb
+efge: main.o Graph.o Node.o Model.o Unigram.o Vocabulary.o Utilities.o
+	$(CC) ${build}/main.o ${build}/Graph.o ${build}/Node.o ${build}/Model.o ${build}/Unigram.o ${build}/Vocabulary.o ${build}/Utilities.o -o efge
 
 main.o: main.cpp
-	$(CC) $(CFLAGS) main.cpp
+	$(CC) $(CFLAGS) main.cpp -o ${build}/main.o
 
-Graph.o: Graph.cpp
-	$(CC) $(CFLAGS) Graph.cpp
+Graph.o: ${src}/Graph.cpp
+	$(CC) $(CFLAGS) ${src}/Graph.cpp -o ${build}/Graph.o
 
-Node.o: Node.cpp
-	$(CC) $(CFLAGS) Node.cpp
+Node.o: ${src}/Node.cpp
+	$(CC) $(CFLAGS) ${src}/Node.cpp -o ${build}/Node.o
 
-Model.o: Model.cpp
-	$(CC) $(CFLAGS) Model.cpp
+Model.o: ${src}/Model.cpp
+	$(CC) $(CFLAGS) ${src}/Model.cpp -o ${build}/Model.o
 
-Unigram.o: Unigram.cpp
-	$(CC) $(CFLAGS) Unigram.cpp
+Unigram.o: ${src}/Unigram.cpp
+	$(CC) $(CFLAGS) ${src}/Unigram.cpp -o ${build}/Unigram.o
 
-Vocabulary.o: Vocabulary.cpp
-	$(CC) $(CFLAGS) Vocabulary.cpp
+Vocabulary.o: ${src}/Vocabulary.cpp
+	$(CC) $(CFLAGS) ${src}/Vocabulary.cpp -o ${build}/Vocabulary.o
 
+Utilities.o: ${src}/Utilities.cpp
+	$(CC) $(CFLAGS) ${src}/Utilities.cpp -o ${build}/Utilities.o
 
+.PHONY: clean
 clean:
-	rm *.o expfamemb
+	rm -r ./build/*.o efge
 
+$(shell   mkdir -p $(build))

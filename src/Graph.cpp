@@ -1,7 +1,3 @@
-//
-// Created by abdulkadir on 13/11/18.
-//
-
 #include "Graph.h"
 
 Graph::Graph() {
@@ -16,7 +12,7 @@ Graph::~Graph() {
 vector <int> Graph::getCommonNeighbours(int u, int v) {
 
     vector <int> common_node_list;
-    int u_nb_inx= 0, v_nb_inx=0;
+    long unsigned int u_nb_inx= 0, v_nb_inx=0;
 
     while(u_nb_inx<adjlist[u].size() && v_nb_inx<adjlist[v].size()) {
         if (adjlist[u][u_nb_inx] < adjlist[v][v_nb_inx]) {
@@ -39,7 +35,7 @@ vector <int> Graph::getCommonNeighbours(int u, int v) {
 
 double Graph::getClusteringCoefficient(int v, int u) {
 
-    int u_nb_inx= 0, v_nb_inx=0;
+    long unsigned int u_nb_inx= 0, v_nb_inx=0;
     double common_count = 0;
 
     while(u_nb_inx<adjlist[u].size() && v_nb_inx<adjlist[v].size()) {
@@ -74,7 +70,7 @@ void Graph::vector2Adjlist(bool directed) {
 
     adjlist.resize(num_of_nodes);
 
-    for(int j=0; j<num_of_edges; j++) {
+    for(unsigned int j=0; j<num_of_edges; j++) {
         adjlist[edges[j][0]].push_back(edges[j][1]);
         if( !directed ) {
             adjlist[edges[j][1]].push_back(edges[j][0]);
@@ -82,7 +78,7 @@ void Graph::vector2Adjlist(bool directed) {
     }
 
     // Sort the nodes in the adjacency list
-    for(int i=0; i<num_of_nodes; i++)
+    for(unsigned int i=0; i<num_of_nodes; i++)
         sort(adjlist[i].begin(), adjlist[i].end());
 
 }
@@ -141,16 +137,16 @@ unsigned int Graph::getNumOfEdges() {
 
 void Graph::getEdges() {
 
-    for(int i=0; i<edges.size(); i++) {
+    for(long unsigned int i=0; i<edges.size(); i++) {
         cout << edges[i][0] << " " << edges[i][1] << endl;
     }
 
 }
 void Graph::printAdjList() {
 
-    for(int i=0; i<num_of_nodes; i++) {
+    for(unsigned int i=0; i<num_of_nodes; i++) {
         cout << i << ": ";
-        for(int j=0; j<adjlist[i].size(); j++) {
+        for(unsigned int j=0; j<adjlist[i].size(); j++) {
             cout << j << " ";
         }
         cout << endl;
