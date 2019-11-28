@@ -3,5 +3,5 @@
 *.embedding
 *.corpus
 ./walks/*
-.idea/*
+.idea
 cmake-build-debug
