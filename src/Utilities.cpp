@@ -89,7 +89,7 @@ int parse_arguments(int argc, char** argv, string &corpus_file, string &output_f
     /* Check if the constraints are satisfied */
     if( parameter_names[3].compare(constraintValues[0]) == 0 or
         parameter_names[3].compare(constraintValues[1]) == 0 or
-        parameter_names[3].compare(constraintValues[2]) ) {
+        parameter_names[3].compare(constraintValues[2]) == 0 ) {
         cout << "Wrong method name: \'" << method_name << "\'. The possible values are " << "("
              << constraintValues[0] << ", " << constraintValues[1] << ", and " << constraintValues[2] << ")" << endl;
         return -5;
