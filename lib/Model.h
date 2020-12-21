@@ -28,6 +28,7 @@ private:
     int window_size, negative_sample_size, dim_size;
     double starting_alpha, min_alpha, decay_rate;
     int num_of_iters;
+    double lambda;
     double std_dev;
 
     int vocab_size;
@@ -42,7 +43,7 @@ private:
 
 public:
 
-    Model(string f_path, string method_name, double s_alpha, double m_alpha, double d_rate, int dim, int neg, int w_size, int num_iters, vector <double> &optionalParams);
+    Model(string f_path, string method_name, double s_alpha, double m_alpha, double d_rate, int dim, int neg, int w_size, int num_iters, double lambda, vector <double> &optionalParams);
     ~Model();
     double sigmoid(double z);
     void bernoulli_update(double alpha, vector <double> labels, int centerId, vector <int> contextIds);

@@ -16,7 +16,7 @@ using namespace std;
 int parse_arguments(int argc, char** argv, string &corpus_file, string &output_file, string &method_name,
                      int &window_size, int &negative_sample_size, int &dimension,
                      double &starting_alpha, double &min_alpha, double &decay_rate, int &num_iters,
-                     vector <double> &optionalParams);
+                    double &lambda, vector <double> &optionalParams);
 
 
 #endif //EFGE_UTILITIES_H

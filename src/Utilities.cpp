@@ -8,12 +8,12 @@
 int parse_arguments(int argc, char** argv, string &corpus_file, string &output_file, string &method_name,
                      int &window_size, int &negative_sample_size, int &dimension,
                      double &starting_alpha, double &min_alpha, double &decay_rate, int &num_iters,
-                     vector <double> &optionalParams) {
+                     double &lambda, vector <double> &optionalParams) {
 
     vector <string> parameter_names{"--help",
                               "--corpus", "--output", "--method",
                               "--window_size", "--neg_sample", "--dim",
-                              "--starting_alpha", "--min_alpha", "--decay_rate", "--num_iters",
+                              "--starting_alpha", "--min_alpha", "--decay_rate", "--num_iters", "--lambda",
                               "--sigma"
     };
 
@@ -35,7 +35,8 @@ int parse_arguments(int argc, char** argv, string &corpus_file, string &output_f
     help_msg_opt << "\t[ " << parameter_names[8] << " (Default: " << min_alpha << ") ]\n";
     help_msg_opt << "\t[ " << parameter_names[9] << " (Default: " << decay_rate << ") ]\n";
     help_msg_opt << "\t[ " << parameter_names[10] << " (Default: " << num_iters << ") ]\n";
-    help_msg_opt << "\t[ " << parameter_names[11] << " (Default: " << optionalParams[0] << ") ]\n";
+    help_msg_opt << "\t[ " << parameter_names[11] << " (Default: " << lambda << ") ]\n";
+    help_msg_opt << "\t[ " << parameter_names[12] << " (Default: " << optionalParams[0] << ") ]\n";
     help_msg_opt << "\t[ " << parameter_names[0] << ", -h ] Shows this message";
 
     help_msg << "" << help_msg_required.str() << help_msg_opt.str();
@@ -66,6 +67,8 @@ int parse_arguments(int argc, char** argv, string &corpus_file, string &output_f
         } else if (arg_name.compare(parameter_names[10]) == 0) {
             num_iters = stoi(argv[i + 1]);
         } else if (arg_name.compare(parameter_names[11]) == 0) {
+            lambda = stod(argv[i + 1]);
+        } else if (arg_name.compare(parameter_names[12]) == 0) {
             optionalParams[0] = stod(argv[i + 1]);
         } else if (arg_name.compare(parameter_names[0]) == 0 or arg_name.compare("-h") == 0) {
             cout << help_msg.str() << endl;

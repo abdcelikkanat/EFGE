@@ -1,6 +1,6 @@
 #include "Model.h"
 
-Model::Model(string f_path, string m_name, double s_alpha, double m_alpha, double d_rate, int dim, int neg, int w_size,  int num_iters, vector <double> &optionalParams) {
+Model::Model(string f_path, string m_name, double s_alpha, double m_alpha, double d_rate, int dim, int neg, int w_size,  int num_iters, double lambda, vector <double> &optionalParams) {
 
     corpus_path = f_path;
     method_name = m_name;
@@ -13,6 +13,8 @@ Model::Model(string f_path, string m_name, double s_alpha, double m_alpha, doubl
     decay_rate = d_rate;
     min_alpha = m_alpha;
     num_of_iters = num_iters;
+
+    this->lambda = lambda;
 
     std_dev = optionalParams[0];
 
@@ -80,10 +82,10 @@ void Model::bernoulli_update(double alpha, vector <double> labels, int centerId,
         }
 
         for (int d = 0; d < dim_size; d++)
-            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+            emb1[contextIds[i]][d] += g * emb0[centerId][d] - alpha*this->lambda*emb1[contextIds[i]][d];
     }
     for (int d = 0; d < dim_size; d++)
-        emb0[centerId][d] += neule[d];
+        emb0[centerId][d] += neule[d] - alpha*this->lambda*emb0[centerId][d];
 
 
     delete[] neule;
@@ -112,10 +114,10 @@ void Model::poisson_update(double alpha, vector <double> labels, int centerId, v
         }
 
         for (int d = 0; d < dim_size; d++)
-            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+            emb1[contextIds[i]][d] += g * emb0[centerId][d] - alpha*this->lambda*emb1[contextIds[i]][d];
     }
     for (int d = 0; d < dim_size; d++)
-        emb0[centerId][d] += neule[d];
+        emb0[centerId][d] += neule[d] - alpha*this->lambda*emb0[centerId][d];;
 
 
     delete[] neule;
@@ -149,10 +151,10 @@ void Model::gaussian_known_var_exp(double alpha, vector <double> labels, int cen
         }
 
         for (int d = 0; d < dim_size; d++)
-            emb1[contextIds[i]][d] += g * emb0[centerId][d];
+            emb1[contextIds[i]][d] += g * emb0[centerId][d] - alpha*this->lambda*emb1[contextIds[i]][d];
     }
     for (int d = 0; d < dim_size; d++)
-        emb0[centerId][d] += neule[d];
+        emb0[centerId][d] += neule[d] - alpha*this->lambda*emb0[centerId][d];;
 
 
     delete[] neule;

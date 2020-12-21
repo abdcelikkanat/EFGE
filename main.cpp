@@ -23,11 +23,12 @@ int main(int argc, char** argv) {
     double min_alpha = 0.0001;
     double decay_rate = 1.0;
     int num_iters = 1;
+    double lambda=0.001;
     vector <double> optionalParams; optionalParams.push_back(1.0); // std_dev
 
     int err_code =  parse_arguments(argc, argv, corpus_file, output_file, method_name,
                                     window_size, negative_sample_size, dim,
-                                    starting_alpha, min_alpha, decay_rate, num_iters,
+                                    starting_alpha, min_alpha, decay_rate, num_iters, lambda,
                                     optionalParams);
 
     if(err_code != 0) {
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    Model model(corpus_file, method_name, starting_alpha, min_alpha, decay_rate, dim, negative_sample_size, window_size, num_iters, optionalParams);
+    Model model(corpus_file, method_name, starting_alpha, min_alpha, decay_rate, dim, negative_sample_size, window_size, num_iters, lambda, optionalParams);
     model.run();
     model.save_embeddings(output_file);
 
